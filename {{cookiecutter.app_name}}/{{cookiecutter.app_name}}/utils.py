@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Helper utilities and decorators."""
 from flask import flash
+from flask import current_app
+from werkzeug.local import LocalProxy
 
 
 def flash_errors(form, category='warning'):
@@ -8,3 +10,6 @@ def flash_errors(form, category='warning'):
     for field, errors in form.errors.items():
         for error in errors:
             flash('{0} - {1}'.format(getattr(form, field).label.text, error), category)
+
+
+logger = LocalProxy(lambda: current_app.logger)

@@ -35,6 +35,10 @@ class DevConfig(Config):
     # Put the db file in project root
     DB_PATH = os.path.join(Config.PROJECT_ROOT, DB_NAME)
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(DB_PATH)
+    SQLALCHEMY_BINDS = {
+        'index': 'sqlite:///{0}/index.db'.format(Config.PROJECT_ROOT),
+        'detail': 'sqlite:///{0}/detail.db'.format(Config.PROJECT_ROOT)
+    }
     DEBUG_TB_ENABLED = True
     ASSETS_DEBUG = True  # Don't bundle/minify static assets
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.

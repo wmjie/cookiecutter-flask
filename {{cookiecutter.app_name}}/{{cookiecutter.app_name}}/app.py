@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
-from flask import Flask, render_template
+from flask import Flask, render_template, g
+from flask_security import SQLAlchemyUserDatastore
+from flask_security.core import current_user
 
 from {{cookiecutter.app_name}} import public, user
 from {{cookiecutter.app_name}}.assets import assets
-from {{cookiecutter.app_name}}.extensions import bcrypt, cache, csrf_protect, db, debug_toolbar, login_manager, migrate
+from {{cookiecutter.app_name}}.extensions import cache, csrf_protect, db, debug_toolbar, login_manager, migrate, security
 from {{cookiecutter.app_name}}.settings import ProdConfig
+from {{cookiecutter.app_name}}.user import User, Role
 
 
 def create_app(config_object=ProdConfig):
@@ -18,18 +21,19 @@ def create_app(config_object=ProdConfig):
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)
+    register_before_request(app)
     return app
 
 
 def register_extensions(app):
     """Register Flask extensions."""
     assets.init_app(app)
-    bcrypt.init_app(app)
     cache.init_app(app)
     db.init_app(app)
     csrf_protect.init_app(app)
-    login_manager.init_app(app)
     debug_toolbar.init_app(app)
+    user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+    security.init_app(app, user_datastore)
     migrate.init_app(app, db)
     return None
 
@@ -50,4 +54,12 @@ def register_errorhandlers(app):
         return render_template('{0}.html'.format(error_code)), error_code
     for errcode in [401, 404, 500]:
         app.errorhandler(errcode)(render_error)
+    return None
+
+
+def register_before_request(app):
+    @app.before_request
+    def g_user():
+        g.user = current_user
+
     return None
